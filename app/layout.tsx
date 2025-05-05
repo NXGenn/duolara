@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Mona_Sans } from "next/font/google";
 
 import "./globals.css";
+import { ThemeProvider } from "next-themes";
 
 const monaSans = Mona_Sans({
   variable: "--font-mona-sans",
@@ -22,8 +23,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${monaSans.className} antialiased pattern`}>
-        {children}
-
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+        >
+          <main className="relative z-10">{children}</main>
+          <Toaster />
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>
