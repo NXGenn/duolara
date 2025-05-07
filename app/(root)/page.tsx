@@ -206,8 +206,14 @@ function InterviewCard({
             className="bg-gradient-to-r from-orange-500/20 to-blue-500/20 hover:from-orange-500/30 hover:to-blue-500/30 text-white"
             asChild
           >
-            <Link href={`/interview/${interview.id}`}>
-              {isPast ? "View Details" : "Start Interview"}
+            <Link
+              href={
+                isPast
+                  ? `/interview/${interview.id}/feedback`
+                  : `/interview/${interview.id}`
+              }
+            >
+              {isPast ? "View feedback" : "Start Interview"}
             </Link>
           </Button>
         </div>
