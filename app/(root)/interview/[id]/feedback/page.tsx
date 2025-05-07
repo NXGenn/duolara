@@ -22,93 +22,202 @@ const Feedback = async ({ params }: RouteParams) => {
     userId: user?.id!,
   });
 
+  // Function to determine score color
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-success-100";
+    if (score >= 60) return "text-primary-200";
+    return "text-destructive-100";
+  };
+
+  // Function to determine progress color
+  const getProgressColor = (score: number) => {
+    if (score >= 80) return "bg-success-100";
+    if (score >= 60) return "bg-primary-200";
+    return "bg-destructive-100";
+  };
+
   return (
     <section className="section-feedback">
-      <div className="flex flex-row justify-center">
-        <h1 className="text-4xl font-semibold">
-          Feedback on the Interview -{" "}
-          <span className="capitalize">{interview.role}</span> Interview
+      <div className="flex flex-row justify-center mb-6">
+        <h1 className="text-4xl text-white font-semibold">
+          Feedback Summary -{" "}
+          <span className="capitalize text-primary-100">{interview.role}</span>{" "}
+          Interview
         </h1>
       </div>
 
-      <div className="flex flex-row justify-center ">
-        <div className="flex flex-row gap-5">
-          {/* Overall Impression */}
-          <div className="flex flex-row gap-2 items-center">
-            <Image src="/star.svg" width={22} height={22} alt="star" />
-            <p>
-              Overall Impression:{" "}
-              <span className="text-primary-200 font-bold">
-                {feedback?.totalScore}
-              </span>
-              /100
-            </p>
-          </div>
+      {/* Summary Stats */}
+      <div className="card-border w-full mb-8">
+        <div className="card p-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            {/* Overall Impression */}
+            <div className="flex flex-row gap-4 items-center">
+              <div className="blue-gradient rounded-full p-3">
+                <Image src="/star.svg" width={24} height={24} alt="star" />
+              </div>
+              <div>
+                <p className="text-light-400">Overall Impression</p>
+                <p className="text-xl font-bold">
+                  <span className={getScoreColor(feedback?.totalScore || 0)}>
+                    {feedback?.totalScore || 0}
+                  </span>
+                  <span className="text-light-400">/100</span>
+                </p>
+              </div>
+            </div>
 
-          {/* Date */}
-          <div className="flex flex-row gap-2">
-            <Image src="/calendar.svg" width={22} height={22} alt="calendar" />
-            <p>
-              {feedback?.createdAt
-                ? dayjs(feedback.createdAt).format("MMM D, YYYY h:mm A")
-                : "N/A"}
-            </p>
+            {/* Date */}
+            <div className="flex flex-row gap-4 items-center">
+              <div className="blue-gradient rounded-full p-3">
+                <Image
+                  src="/calendar.svg"
+                  width={24}
+                  height={24}
+                  alt="calendar"
+                />
+              </div>
+              <div>
+                <p className="text-light-400">Interview Date</p>
+                <p>
+                  {feedback?.createdAt
+                    ? dayjs(feedback.createdAt).format("MMM D, YYYY h:mm A")
+                    : "N/A"}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <hr />
+      {/* Final Assessment */}
+      <div className="card-border w-full mb-8">
+        <div className="card p-6">
+          <h2 className="text-2xl font-semibold text-white mb-4">
+            Final Assessment
+          </h2>
+          <p className="text-lg">
+            {feedback?.finalAssessment || "No assessment available"}
+          </p>
+        </div>
+      </div>
 
-      <p>{feedback?.finalAssessment}</p>
-
-      {/* Interview Breakdown */}
-      <div className="flex flex-col gap-4">
-        <h2>Breakdown of the Interview:</h2>
+      {/* Category Breakdown */}
+      <h2 className="text-2xl font-semibold text-white mb-4">
+        Interview Breakdown
+      </h2>
+      <div className="flex flex-col gap-4 mb-8">
         {feedback?.categoryScores?.map((category, index) => (
-          <div key={index}>
-            <p className="font-bold">
-              {index + 1}. {category.name} ({category.score}/100)
-            </p>
-            <p>{category.comment}</p>
+          <div key={index} className="card-border w-full">
+            <div className="card p-6">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-xl font-semibold text-white">
+                  {category.name}
+                </h3>
+                <div className="px-3 py-1 rounded-full text-sm font-medium bg-dark-200">
+                  <span className={getScoreColor(category.score)}>
+                    {category.score}
+                  </span>
+                  <span className="text-light-400">/100</span>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-dark-200 h-2 rounded-full mb-4">
+                <div
+                  className={`${getProgressColor(
+                    category.score
+                  )} h-full rounded-full`}
+                  style={{ width: `${category.score}%` }}
+                ></div>
+              </div>
+
+              {/* Detailed Feedback */}
+              <p className="text-lg">{category.comment}</p>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col gap-3">
-        <h3>Strengths</h3>
-        <ul>
-          {feedback?.strengths?.map((strength, index) => (
-            <li key={index}>{strength}</li>
-          ))}
-        </ul>
+      {/* Strengths and Improvements */}
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        {/* Strengths */}
+        <div className="card-border w-full">
+          <div className="blue-gradient-dark p-6 rounded-2xl h-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-success-100 rounded-full p-1">
+                <Image
+                  src="/check.svg"
+                  width={20}
+                  height={20}
+                  alt="Strengths"
+                />
+              </div>
+              <h3 className="text-xl font-semibold text-white">Strengths</h3>
+            </div>
+
+            {feedback?.strengths && feedback.strengths.length > 0 ? (
+              <ul className="list-disc list-inside space-y-2">
+                {feedback.strengths.map((strength, index) => (
+                  <li key={index}>{strength}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-light-400">No strengths recorded</p>
+            )}
+          </div>
+        </div>
+
+        {/* Areas for Improvement */}
+        <div className="card-border w-full">
+          <div className="blue-gradient-dark p-6 rounded-2xl h-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-primary-200 rounded-full p-1">
+                <Image
+                  src="/arrow-up.svg"
+                  width={20}
+                  height={20}
+                  alt="Improvements"
+                />
+              </div>
+              <h3 className="text-xl font-semibold text-white">
+                Areas for Improvement
+              </h3>
+            </div>
+
+            {feedback?.areasForImprovement &&
+            feedback.areasForImprovement.length > 0 ? (
+              <ul className="list-disc list-inside space-y-2">
+                {feedback.areasForImprovement.map((area, index) => (
+                  <li key={index}>{area}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-light-400">
+                No areas for improvement recorded
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <h3>Areas for Improvement</h3>
-        <ul>
-          {feedback?.areasForImprovement?.map((area, index) => (
-            <li key={index}>{area}</li>
-          ))}
-        </ul>
-      </div>
-
+      {/* Action Buttons */}
       <div className="buttons">
-        <Button className="btn-secondary flex-1">
-          <Link href="/" className="flex w-full justify-center">
-            <p className="text-sm font-semibold text-primary-200 text-center">
-              Back to dashboard
-            </p>
+        <Button className="btn-secondary">
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/dashboard.svg"
+              width={20}
+              height={20}
+              alt="Dashboard"
+            />
+            <span>Back to Dashboard</span>
           </Link>
         </Button>
 
-        <Button className="btn-primary flex-1">
-          <Link
-            href={`/interview/${id}`}
-            className="flex w-full justify-center"
-          >
-            <p className="text-sm font-semibold text-black text-center">
-              Retake Interview
-            </p>
+        <Button className="btn-primary">
+          <Link href={`/interview/${id}`} className="flex items-center gap-2">
+            <Image src="/retry.svg" width={20} height={20} alt="Retry" />
+            <span>Retake Interview</span>
           </Link>
         </Button>
       </div>
