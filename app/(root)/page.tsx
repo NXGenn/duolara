@@ -23,6 +23,7 @@ interface Interview {
   score?: number;
   description?: string;
   createdAt?: Date;
+  completed?: boolean; // Add this field to track completed interviews
 }
 
 function HeroSection() {
@@ -224,8 +225,10 @@ function InterviewCard({
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
-  const [userInterviews, setUserInterviews] = useState<Interview[]>([]);
-  const [allInterviews, setAllInterviews] = useState<Interview[]>([]);
+  const [pastInterviews, setPastInterviews] = useState<Interview[]>([]);
+  const [availableInterviews, setAvailableInterviews] = useState<Interview[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -235,13 +238,20 @@ export default function Home() {
         setUser(userData);
 
         if (userData?.id) {
-          const [userInterviewsData, allInterviewsData] = await Promise.all([
-            getInterviewsByUserId(userData.id),
-            getLatestInterviews({ userId: userData.id }),
-          ]);
+          // Fetch user's past interviews
+          const userInterviewsData = await getInterviewsByUserId(userData.id);
 
-          setUserInterviews(userInterviewsData || []);
-          setAllInterviews(allInterviewsData || []);
+          // Keep the original behavior for past interviews
+          // Don't apply strict filtering that might cause data loss
+          setPastInterviews(userInterviewsData || []);
+
+          // Fetch available interview templates
+          const availableInterviewsData = await getLatestInterviews({
+            userId: userData.id,
+            // Removing the excludeCompleted param to preserve original behavior
+          });
+
+          setAvailableInterviews(availableInterviewsData || []);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -253,8 +263,8 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const hasPastInterviews = userInterviews.length > 0;
-  const hasUpcomingInterviews = allInterviews.length > 0;
+  const hasPastInterviews = pastInterviews.length > 0;
+  const hasAvailableInterviews = availableInterviews.length > 0;
 
   return (
     <>
@@ -272,7 +282,7 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {hasPastInterviews ? (
-                userInterviews.map((interview, index) => (
+                pastInterviews.map((interview, index) => (
                   <motion.div
                     key={interview.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -295,7 +305,7 @@ export default function Home() {
 
         <section className="py-12">
           <h2 className="text-2xl font-bold mb-8 text-white">
-            Pick Your Interview
+            Interview For You
           </h2>
           {loading ? (
             <div className="flex justify-center">
@@ -303,8 +313,8 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {hasUpcomingInterviews ? (
-                allInterviews.map((interview, index) => (
+              {hasAvailableInterviews ? (
+                availableInterviews.map((interview, index) => (
                   <motion.div
                     key={interview.id}
                     initial={{ opacity: 0, y: 20 }}
