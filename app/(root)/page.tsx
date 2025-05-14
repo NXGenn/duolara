@@ -9,6 +9,8 @@ import {
   getInterviewsByUserId,
   getLatestInterviews,
 } from "@/lib/actions/general.action";
+import { Inter } from "next/font/google";
+import InterviewTokens from "@/components/InterviewTokens";
 
 async function Home() {
   const user = await getCurrentUser();
@@ -45,8 +47,8 @@ async function Home() {
       </section>
 
       <section className="flex flex-col gap-6 mt-8">
+        <InterviewTokens />
         <h2>Your Interviews</h2>
-
         <div className="interviews-section">
           {hasPastInterviews ? (
             userInterviews?.map((interview) => (

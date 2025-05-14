@@ -4,6 +4,7 @@ import { Mona_Sans } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "@/context/AuthContext"; // ✅ Import this
 
 const monaSans = Mona_Sans({
   variable: "--font-mona-sans",
@@ -28,8 +29,10 @@ export default function RootLayout({
           defaultTheme="dark"
           enableSystem={false}
         >
-          <main className="relative z-10">{children}</main>
-          <Toaster />
+          <AuthProvider>
+            <main className="relative z-10">{children}</main>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
         <Toaster />
       </body>
